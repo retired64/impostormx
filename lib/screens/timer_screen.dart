@@ -1,0 +1,179 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../providers/game_provider.dart';
+import '../widgets/common.dart';
+import '../widgets/inputs.dart';
+import '../config/theme.dart';
+import 'voting_screen.dart';
+
+class TimerScreen extends StatefulWidget {
+  const TimerScreen({super.key});
+  @override
+  State<TimerScreen> createState() => _TimerScreenState();
+}
+
+class _TimerScreenState extends State<TimerScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final g = Provider.of<GameProvider>(context, listen: false);
+      g.startTimer();
+      g.addListener(_listener);
+    });
+  }
+
+  void _listener() {
+    final g = Provider.of<GameProvider>(context, listen: false);
+    if (g.status == GameStatus.finished && mounted) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (_) => BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(30),
+              decoration: BoxDecoration(
+                color: AppColors.bgBottom,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: AppColors.error, width: 2),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.timer_off, color: AppColors.error, size: 50),
+                  const SizedBox(height: 20),
+                  Text("TIEMPO", style: AppTheme.heading(30)),
+                  const SizedBox(height: 30),
+                  BouncyButton(
+                    text: "VOTAR",
+                    onPressed: () {
+                      g.stopAudio();
+                      Navigator.pop(context);
+                    },
+                    color: AppColors.error,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    try {
+      Provider.of<GameProvider>(
+        context,
+        listen: false,
+      ).removeListener(_listener);
+    } catch (_) {}
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final g = Provider.of<GameProvider>(context);
+    final progress = g.remainingSeconds / g.initialTimeSeconds;
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: GameBackground(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("DEBATE", style: AppTheme.heading(20)),
+              const SizedBox(height: 10),
+              Text(
+                g.selectedCategory!.name,
+                style: const TextStyle(
+                  color: AppColors.accent,
+                  letterSpacing: 2,
+                ),
+              ),
+              const Spacer(),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 250,
+                    height: 250,
+                    child: CircularProgressIndicator(
+                      value: progress,
+                      strokeWidth: 15,
+                      backgroundColor: Colors.white10,
+                      color: progress < 0.2
+                          ? AppColors.error
+                          : AppColors.accent,
+                    ),
+                  ),
+                  Text(
+                    "${(g.remainingSeconds / 60).floor()}:${(g.remainingSeconds % 60).toString().padLeft(2, '0')}",
+                    style: GoogleFonts.robotoMono(
+                      fontSize: 60,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 40),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _RoundBtn(
+                    icon: g.isTimerRunning ? Icons.pause : Icons.play_arrow,
+                    onTap: g.isTimerRunning ? g.pauseTimer : g.startTimer,
+                  ),
+                  const SizedBox(width: 20),
+                  _RoundBtn(icon: Icons.add_alarm, onTap: g.addExtraTime),
+                ],
+              ),
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.all(30),
+                child: BouncyButton(
+                  text: "VOTAR",
+                  color: Colors.white,
+                  onPressed: () {
+                    g.finishGameAndVote();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const VotingScreen()),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RoundBtn extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _RoundBtn({required this.icon, required this.onTap});
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white24),
+      ),
+      child: Icon(icon, color: Colors.white),
+    ),
+  );
+}

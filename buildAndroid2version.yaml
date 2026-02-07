@@ -1,0 +1,70 @@
+name: Build ImpostorMX Android
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    name: Build Android Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Build Android App Bundle (AAB)
+        run: flutter build appbundle --release
+
+      - name: Rename builds
+        run: |
+          BUILD_PATH="build/app/outputs"
+          
+          # Renombrar APK
+          cp "$BUILD_PATH/flutter-apk/app-release.apk" \
+             "impostormx-v1.0.0.apk"
+          
+          # Renombrar AAB
+          cp "$BUILD_PATH/bundle/release/app-release.aab" \
+             "impostormx-v1.0.0.aab"
+          
+          # Mostrar información
+          echo "✓ Builds renamed successfully"
+          ls -lh impostormx-v1.0.0.*
+        shell: bash
+
+      - name: Upload APK (para pruebas)
+        uses: actions/upload-artifact@v4
+        with:
+          name: impostormx-apk
+          path: impostormx-v1.0.0.apk
+          retention-days: 90
+
+      - name: Upload AAB (para Play Store)
+        uses: actions/upload-artifact@v4
+        with:
+          name: impostormx-aab
+          path: impostormx-v1.0.0.aab
+          retention-days: 90

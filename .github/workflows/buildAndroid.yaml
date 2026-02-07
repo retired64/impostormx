@@ -1,0 +1,68 @@
+name: Build ImpostorMX Android
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    name: Build Android Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Build Android App Bundle (AAB)
+        run: flutter build appbundle --release
+
+      - name: Package Android Builds
+        run: |
+          BUILD_PATH="build/app/outputs"
+          APP_NAME="impostormx-android-v1.0.0"
+          
+          # Crear carpeta para empaquetado
+          mkdir -p "$APP_NAME"
+          
+          # Copiar APK
+          cp "$BUILD_PATH/flutter-apk/app-release.apk" "$APP_NAME/impostormx-v1.0.0.apk"
+          
+          # Copiar AAB (para Google Play)
+          cp "$BUILD_PATH/bundle/release/app-release.aab" "$APP_NAME/impostormx-v1.0.0.aab"
+          
+          # Mostrar información
+          echo "✓ Android builds packaged successfully"
+          ls -lh "$APP_NAME"
+        shell: bash
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: impostormx-android-apk
+          path: impostormx-android-v1.0.0/impostormx-v1.0.0.apk
+          retention-days: 30
+
+      - name: Upload Android AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: impostormx-android-aab
+          path: impostormx-android-v1.0.0/impostormx-v1.0.0.aab
+          retention-days: 30
