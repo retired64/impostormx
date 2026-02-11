@@ -36,4 +36,13 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-  - assets/sounds/
+    - assets/sounds/
+
+  fonts:
+    - family: Bungee
+      fonts:
+        - asset: assets/fonts/Bungee-Regular.ttf
+
+    - family: YoungSerif
+      fonts:
+        - asset: assets/fonts/YoungSerif-Regular.ttf

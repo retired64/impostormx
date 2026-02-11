@@ -54,6 +54,11 @@ class _TimerScreenState extends State<TimerScreen> {
                     onPressed: () {
                       g.stopAudio();
                       Navigator.pop(context);
+                      g.finishGameAndVote();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const VotingScreen()),
+                      );
                     },
                     color: AppColors.error,
                   ),

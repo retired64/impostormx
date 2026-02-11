@@ -6,6 +6,7 @@ import '../widgets/common.dart';
 import '../config/theme.dart';
 import '../config/constants.dart';
 import 'reveal_screen.dart';
+import '../utils/sound_manager.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,7 +22,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (pin.length == 4) {
         if (pin == p.pin) {
           Vibration.vibrate(pattern: GameConstants.hapticSuccess);
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const RevealScreen()));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const RevealScreen()),
+          );
         } else {
           Vibration.vibrate(pattern: GameConstants.hapticError);
           pin = "";
@@ -46,13 +50,28 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 40),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(4, (i) => Container(
-                margin: const EdgeInsets.symmetric(horizontal: 8), width: 16, height: 16,
-                decoration: BoxDecoration(color: i < pin.length ? AppColors.accent : Colors.white10, shape: BoxShape.circle),
-              )),
+              children: List.generate(
+                4,
+                (i) => Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  width: 16,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: i < pin.length ? AppColors.accent : Colors.white10,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 50),
-            _Numpad(onTap: (v) => _tap(v, p), onBack: () => setState(() => pin = pin.isNotEmpty ? pin.substring(0, pin.length - 1) : "")),
+            _Numpad(
+              onTap: (v) => _tap(v, p),
+              onBack: () => setState(
+                () => pin = pin.isNotEmpty
+                    ? pin.substring(0, pin.length - 1)
+                    : "",
+              ),
+            ),
           ],
         ),
       ),
@@ -66,7 +85,31 @@ class _Numpad extends StatelessWidget {
   const _Numpad({required this.onTap, required this.onBack});
   @override
   Widget build(BuildContext context) {
-    return SizedBox(width: 280, child: Wrap(spacing: 20, runSpacing: 20, alignment: WrapAlignment.center, children: [...List.generate(9, (i) => _NumKey("${i + 1}", onTap)), const SizedBox(width: 80), _NumKey("0", onTap), GestureDetector(onTap: onBack, child: Container(width: 80, height: 80, alignment: Alignment.center, child: const Icon(Icons.backspace_outlined, color: AppColors.error)))]));
+    return SizedBox(
+      width: 280,
+      child: Wrap(
+        spacing: 20,
+        runSpacing: 20,
+        alignment: WrapAlignment.center,
+        children: [
+          ...List.generate(9, (i) => _NumKey("${i + 1}", onTap)),
+          const SizedBox(width: 80),
+          _NumKey("0", onTap),
+          GestureDetector(
+            onTap: onBack,
+            child: Container(
+              width: 80,
+              height: 80,
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.backspace_outlined,
+                color: AppColors.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -76,6 +119,29 @@ class _NumKey extends StatelessWidget {
   const _NumKey(this.val, this.onTap);
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(onTap: () { Vibration.vibrate(duration: 10); onTap(val); }, child: Container(width: 80, height: 80, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.05)), child: Text(val, style: const TextStyle(fontSize: 28, color: Colors.white, fontWeight: FontWeight.w600))));
+    return GestureDetector(
+      onTap: () {
+        Vibration.vibrate(duration: 10);
+        SoundManager.playClick();
+        onTap(val);
+      },
+      child: Container(
+        width: 80,
+        height: 80,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withOpacity(0.05),
+        ),
+        child: Text(
+          val,
+          style: const TextStyle(
+            fontSize: 28,
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
   }
 }
