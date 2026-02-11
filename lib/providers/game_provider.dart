@@ -28,6 +28,7 @@ enum GameStatus { setup, playing, finished }
 
 class GameProvider with ChangeNotifier {
   // Lógica de Categorías y Jugadores
+  List<String> punishments = []; // Lista dinámica de castigos
   List<Category> _customCategories = [];
   List<Category> get allCategories => [
     ...GAME_CATEGORIES,
@@ -54,16 +55,16 @@ class GameProvider with ChangeNotifier {
     _audioPlayer = AudioPlayer();
     _initGame();
     _loadCustomCategories();
+    _loadPunishments(); // <--- NUEVO: Cargar castigos al iniciar
   }
 
   void _initGame() {
-    // CORREGIDO: Agregadas llaves {} al for
     for (int i = 0; i < 4; i++) {
       _addEmptyPlayer();
     }
   }
 
-  // --- PERSISTENCIA ---
+  // --- PERSISTENCIA (CATEGORÍAS) ---
   Future<void> _loadCustomCategories() async {
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getString(GameConstants.prefsCustomCategories);
@@ -105,6 +106,47 @@ class GameProvider with ChangeNotifier {
     await prefs.setString(GameConstants.prefsCustomCategories, encoded);
   }
 
+  // --- PERSISTENCIA (CASTIGOS / RULETA) ---
+  // Esta es la sección nueva que maneja la ruleta personalizable
+
+  Future<void> _loadPunishments() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getStringList(GameConstants.prefsPunishments);
+    if (stored != null && stored.isNotEmpty) {
+      punishments = stored;
+    } else {
+      // Si es la primera vez, cargamos los defaults de constants.dart
+      punishments = List.from(GameConstants.punishments);
+    }
+    notifyListeners();
+  }
+
+  Future<void> addPunishment(String text) async {
+    punishments.add(text);
+    await _savePunishments();
+    notifyListeners();
+  }
+
+  Future<void> removePunishment(int index) async {
+    // Evitamos dejar la lista vacía para que no truene la ruleta
+    if (punishments.length > 1) {
+      punishments.removeAt(index);
+      await _savePunishments();
+      notifyListeners();
+    }
+  }
+
+  Future<void> resetPunishments() async {
+    punishments = List.from(GameConstants.punishments);
+    await _savePunishments();
+    notifyListeners();
+  }
+
+  Future<void> _savePunishments() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(GameConstants.prefsPunishments, punishments);
+  }
+
   // --- HARDWARE ---
   Future<void> playAlarm() async {
     try {
@@ -127,7 +169,6 @@ class GameProvider with ChangeNotifier {
 
   // --- GESTIÓN JUGADORES ---
   void _addEmptyPlayer() {
-    // Usamos el tiempo actual para asegurar IDs únicos
     players.add(
       Player(
         id:
@@ -225,26 +266,23 @@ class GameProvider with ChangeNotifier {
     _timer?.cancel();
     isTimerRunning = false;
 
-    // CORREGIDO: Agregadas llaves {}
     for (var p in players) {
       p.role = 'civilian';
     }
 
-    // 3. GENERADOR DE CAOS (Basado en Microsegundos)
+    // 3. GENERADOR DE CAOS
     final random = Random(DateTime.now().microsecondsSinceEpoch);
 
     // Selección de Palabra
     secretWord =
         selectedCategory!.words[random.nextInt(selectedCategory!.words.length)];
 
-    // 4. SELECCIÓN DE IMPOSTOR (Método de la Bolsa)
+    // 4. SELECCIÓN DE IMPOSTOR
     int safeImpostorCount = impostorCount;
     if (safeImpostorCount >= lockedPlayers.length) safeImpostorCount = 1;
 
-    // Lista de índices disponibles
     List<int> bagOfIndices = List.generate(lockedPlayers.length, (i) => i);
 
-    // CORREGIDO: Agregadas llaves {}
     for (int i = 0; i < safeImpostorCount; i++) {
       if (bagOfIndices.isEmpty) break;
 
@@ -334,7 +372,6 @@ class GameProvider with ChangeNotifier {
 
   void prepareNewMatch() {
     _cleanup();
-    // CORREGIDO: Agregadas llaves {}
     for (var p in players) {
       p.role = 'civilian';
     }

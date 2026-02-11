@@ -7,7 +7,6 @@ import 'package:vibration/vibration.dart';
 import '../providers/game_provider.dart';
 import '../widgets/inputs.dart';
 import '../config/theme.dart';
-import '../config/constants.dart';
 import '../utils/sound_manager.dart';
 import 'category_screen.dart';
 
@@ -168,14 +167,23 @@ class _PunishmentRouletteState extends State<PunishmentRoulette> {
     setState(() => _isSpinning = true);
     SoundManager.playClick(); // Sonido inicial
 
-    // Elegimos un castigo aleatorio
-    final index = Random().nextInt(GameConstants.punishments.length);
+    // 1. OBTENER LISTA DINÁMICA DEL PROVIDER
+    final punishments = Provider.of<GameProvider>(
+      context,
+      listen: false,
+    ).punishments;
+
+    // Elegimos un castigo aleatorio de la lista actual
+    final index = Random().nextInt(punishments.length);
     _lastIndex = index; // Lo guardamos para usarlo en el diálogo
     _selected.add(index); // Le decimos a la ruleta que gire hasta ese índice
   }
 
   @override
   Widget build(BuildContext context) {
+    // 2. ESCUCHAR CAMBIOS EN LA LISTA (Para construir la ruleta con los datos reales)
+    final punishments = Provider.of<GameProvider>(context).punishments;
+
     return Column(
       children: [
         // ÁREA DE LA RULETA
@@ -219,9 +227,9 @@ class _PunishmentRouletteState extends State<PunishmentRoulette> {
                       child: TriangleIndicator(color: Colors.white),
                     ),
                   ],
-                  // Generamos los items (rebanadas) dinámicamente
+                  // Generamos los items (rebanadas) dinámicamente usando la variable 'punishments'
                   items: [
-                    for (int i = 0; i < GameConstants.punishments.length; i++)
+                    for (int i = 0; i < punishments.length; i++)
                       FortuneItem(
                         style: FortuneItemStyle(
                           color:
@@ -238,7 +246,7 @@ class _PunishmentRouletteState extends State<PunishmentRoulette> {
                         child: Padding(
                           padding: const EdgeInsets.all(25.0),
                           child: Text(
-                            GameConstants.punishments[i],
+                            punishments[i], // USAR EL TEXTO DINÁMICO
                             textAlign: TextAlign.center,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
@@ -306,6 +314,12 @@ class _PunishmentRouletteState extends State<PunishmentRoulette> {
   }
 
   void _showResultDialog() {
+    // 3. OBTENER EL TEXTO DEL CASTIGO GANADOR DESDE EL PROVIDER
+    final punishments = Provider.of<GameProvider>(
+      context,
+      listen: false,
+    ).punishments;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -339,8 +353,7 @@ class _PunishmentRouletteState extends State<PunishmentRoulette> {
               ),
               const SizedBox(height: 20),
               Text(
-                GameConstants
-                    .punishments[_lastIndex], // Muestra el castigo seleccionado
+                punishments[_lastIndex], // Muestra el castigo dinámico
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontFamily: 'YoungSerif',

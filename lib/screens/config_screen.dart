@@ -4,7 +4,8 @@ import '../providers/game_provider.dart';
 import '../widgets/common.dart';
 import '../widgets/inputs.dart';
 import '../config/theme.dart';
-import 'login_screen.dart'; // Import necesario para la navegación
+import 'login_screen.dart';
+import 'punishments_screen.dart'; // <--- IMPORTANTE: Importamos la nueva pantalla
 
 class ConfigScreen extends StatelessWidget {
   const ConfigScreen({super.key});
@@ -16,16 +17,53 @@ class ConfigScreen extends StatelessWidget {
       body: GameBackground(
         child: Column(
           children: [
-            GameNavBar(title: "Configuración", onBack: () => Navigator.pop(context)),
+            GameNavBar(
+              title: "Configuración",
+              onBack: () => Navigator.pop(context),
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _Counter("Impostores", "${game.impostorCount}", game.adjustImpostors),
+                    _Counter(
+                      "Impostores",
+                      "${game.impostorCount}",
+                      game.adjustImpostors,
+                    ),
                     const SizedBox(height: 20),
-                    _Counter("Tiempo", "${(game.initialTimeSeconds / 60).floor()}:${(game.initialTimeSeconds % 60).toString().padLeft(2, '0')}", (d) => game.adjustTime(d * 30)),
+                    _Counter(
+                      "Tiempo",
+                      "${(game.initialTimeSeconds / 60).floor()}:${(game.initialTimeSeconds % 60).toString().padLeft(2, '0')}",
+                      (d) => game.adjustTime(d * 30),
+                    ),
+
+                    // --- NUEVO BOTÓN PARA EDITAR CASTIGOS ---
+                    const SizedBox(height: 30),
+                    GameCard(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PunishmentsScreen(),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: const [
+                          Text(
+                            "Editar Castigos",
+                            style: TextStyle(
+                              fontFamily: 'Bungee',
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Icon(Icons.edit_note, color: AppColors.accent),
+                        ],
+                      ),
+                    ),
+                    // ----------------------------------------
                   ],
                 ),
               ),
@@ -37,10 +75,14 @@ class ConfigScreen extends StatelessWidget {
                 onPressed: () {
                   game.startGame();
                   // Usamos pushAndRemoveUntil para reiniciar la pila de navegación
-                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const LoginScreen()), (r) => false);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (r) => false,
+                  );
                 },
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -59,7 +101,14 @@ class _Counter extends StatelessWidget {
     return GameCard(
       child: Column(
         children: [
-          Text(label, style: const TextStyle(color: Colors.white54, fontSize: 14, letterSpacing: 1)),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 14,
+              letterSpacing: 1,
+            ),
+          ),
           const SizedBox(height: 15),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -68,7 +117,7 @@ class _Counter extends StatelessWidget {
               Text(value, style: AppTheme.heading(36)),
               _RoundBtn(icon: Icons.add, onTap: () => onChange(1)),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -84,8 +133,12 @@ class _RoundBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 50, height: 50,
-        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white24)),
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white24),
+        ),
         child: Icon(icon, color: Colors.white),
       ),
     );
