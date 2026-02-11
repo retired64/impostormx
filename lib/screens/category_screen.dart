@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:audioplayers/audioplayers.dart'; // <--- 1. IMPORTAR AUDIOPLAYERS
 import '../providers/game_provider.dart';
 import '../widgets/common.dart';
 import '../config/theme.dart';
 import '../words.dart';
+import '../utils/sound_manager.dart';
 import 'create_category_screen.dart';
 
 class CategoryScreen extends StatefulWidget {
@@ -102,6 +104,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                       final isCustom = i >= GAME_CATEGORIES.length;
                       return GestureDetector(
                         onTap: () {
+                          SoundManager.playClick();
                           game.selectCategory(cat);
                           Navigator.pushNamed(context, '/players');
                         },
@@ -241,6 +244,10 @@ class _TutorialCard extends StatefulWidget {
 class _TutorialCardState extends State<_TutorialCard> {
   int _currentStep = 0;
 
+  // 2. VARIABLES DE AUDIO
+  late AudioPlayer _audioPlayer;
+  bool _isPlaying = false;
+
   final List<Map<String, String>> _steps = [
     {
       "title": "PASO 1",
@@ -268,6 +275,37 @@ class _TutorialCardState extends State<_TutorialCard> {
           "Cuando el tiempo acabe, voten por quien crean que miente. ¡Si atrapan al Impostor, ganan los civiles! Si el Impostor sobrevive, gana él! El perdedor de la partida tendrá que girar la ruleta de castigos... ¡Suerte!",
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializar reproductor
+    _audioPlayer = AudioPlayer();
+
+    // Escuchar cuando el audio termina para cambiar el ícono
+    _audioPlayer.onPlayerComplete.listen((event) {
+      if (mounted) setState(() => _isPlaying = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    // Detener y liberar memoria al cerrar el tutorial
+    _audioPlayer.stop();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  // Función para controlar el audio
+  void _toggleAudio() async {
+    if (_isPlaying) {
+      await _audioPlayer.pause();
+      setState(() => _isPlaying = false);
+    } else {
+      await _audioPlayer.play(AssetSource('sounds/pasos.mp3'));
+      setState(() => _isPlaying = true);
+    }
+  }
 
   void _next() {
     if (_currentStep < _steps.length - 1) {
@@ -300,7 +338,7 @@ class _TutorialCardState extends State<_TutorialCard> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cabecera: Título y Cerrar
+          // Cabecera: Título, Botón de Audio y Cerrar
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -312,11 +350,26 @@ class _TutorialCardState extends State<_TutorialCard> {
                   color: AppColors.accent,
                 ),
               ),
-              IconButton(
-                onPressed: widget.onClose,
-                icon: const Icon(Icons.close, color: Colors.white54),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+
+              Row(
+                children: [
+                  // 3. BOTÓN DE AUDIO NUEVO
+                  IconButton(
+                    onPressed: _toggleAudio,
+                    icon: Icon(
+                      _isPlaying ? Icons.stop_circle_outlined : Icons.volume_up,
+                      color: _isPlaying ? AppColors.error : Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  IconButton(
+                    onPressed: widget.onClose,
+                    icon: const Icon(Icons.close, color: Colors.white54),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
               ),
             ],
           ),
