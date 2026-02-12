@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:audioplayers/audioplayers.dart'; // <--- 1. IMPORTAR AUDIOPLAYERS
+import 'package:audioplayers/audioplayers.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/game_provider.dart';
 import '../widgets/common.dart';
 import '../config/theme.dart';
@@ -19,12 +20,77 @@ class _CategoryScreenState extends State<CategoryScreen> {
   // Estado para controlar si se muestra el tutorial
   bool _showTutorial = false;
 
+  // --- FUNCIÓN PARA ABRIR KO-FI ---
+  Future<void> _launchKoFi() async {
+    final Uri url = Uri.parse('https://ko-fi.com/impostormx');
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        throw Exception('No se pudo abrir $url');
+      }
+    } catch (e) {
+      debugPrint("Error abriendo URL: $e");
+    }
+  }
+
+  // --- MOSTRAR MODAL DE AJUSTES Y DONACIÓN ---
+  void _showSettingsModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        padding: const EdgeInsets.all(25),
+        decoration: const BoxDecoration(
+          color: AppColors.bgBottom,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          border: Border(top: BorderSide(color: AppColors.accent, width: 2)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "AJUSTES",
+              style: TextStyle(
+                fontFamily: 'Bungee',
+                fontSize: 24,
+                color: Colors.white,
+              ),
+            ),
+
+            // Eliminamos los switches de sonido/vibración y dejamos solo la separación
+            const SizedBox(height: 20),
+            const Divider(color: Colors.white24, height: 30),
+
+            // --- SECCIÓN DE DONACIÓN ---
+            const Text(
+              "¡Apoya el proyecto!",
+              style: TextStyle(
+                fontFamily: 'YoungSerif',
+                color: Colors.white70,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 15),
+
+            // EL BOTÓN ANIMADO
+            _AnimatedKoFiButton(onTap: _launchKoFi),
+
+            const SizedBox(height: 20),
+            const Text(
+              "v1.0 Open Source - by Miguel",
+              style: TextStyle(color: Colors.white24, fontSize: 10),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final game = Provider.of<GameProvider>(context);
 
     return Scaffold(
-      // BOTÓN FLOTANTE DE AYUDA (Solo aparece si no hay tutorial activo)
+      // BOTÓN FLOTANTE DE AYUDA
       floatingActionButton: _showTutorial
           ? null
           : FloatingActionButton(
@@ -39,7 +105,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
       body: Stack(
         children: [
-          // 1. EL CONTENIDO PRINCIPAL (Tu pantalla original)
+          // 1. CONTENIDO PRINCIPAL
           GameBackground(
             child: Column(
               children: [
@@ -69,25 +135,52 @@ class _CategoryScreenState extends State<CategoryScreen> {
                           ),
                         ],
                       ),
-                      IconButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const CreateCategoryScreen(),
+
+                      // --- BOTONES DE CABECERA (AÑADIR Y AJUSTES) ---
+                      Row(
+                        children: [
+                          // Botón Añadir (+)
+                          IconButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const CreateCategoryScreen(),
+                              ),
+                            ),
+                            icon: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: const BoxDecoration(
+                                color: AppColors.surface,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.add,
+                                color: AppColors.accent,
+                              ),
+                            ),
                           ),
-                        ),
-                        icon: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: const BoxDecoration(
-                            color: AppColors.surface,
-                            shape: BoxShape.circle,
+
+                          // Botón Ajustes (Engranaje)
+                          IconButton(
+                            onPressed: () => _showSettingsModal(context),
+                            icon: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.settings,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
-                          child: const Icon(Icons.add, color: AppColors.accent),
-                        ),
+                        ],
                       ),
                     ],
                   ),
                 ),
+
                 Expanded(
                   child: GridView.builder(
                     padding: const EdgeInsets.all(20),
@@ -157,12 +250,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
             ),
           ),
 
-          // 2. LA CAPA OSCURA DE FONDO (Para resaltar el tutorial)
+          // 2. CAPA OSCURA TUTORIAL
           if (_showTutorial)
             GestureDetector(
-              onTap: () => setState(
-                () => _showTutorial = false,
-              ), // Cerrar al tocar fuera
+              onTap: () => setState(() => _showTutorial = false),
               child: Container(
                 color: Colors.black87,
                 width: double.infinity,
@@ -170,7 +261,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               ),
             ),
 
-          // 3. EL CUADRO DE TUTORIAL FLOTANTE
+          // 3. WIDGET TUTORIAL
           if (_showTutorial)
             Center(
               child: Padding(
@@ -232,6 +323,89 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }
 }
 
+// --- CLASE DEL BOTÓN ANIMADO DE KO-FI ---
+class _AnimatedKoFiButton extends StatefulWidget {
+  final VoidCallback onTap;
+  const _AnimatedKoFiButton({required this.onTap});
+
+  @override
+  State<_AnimatedKoFiButton> createState() => _AnimatedKoFiButtonState();
+}
+
+class _AnimatedKoFiButtonState extends State<_AnimatedKoFiButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Animación de latido (Pulse)
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: Tween(
+        begin: 0.95,
+        end: 1.05,
+      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut)),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          height: 55,
+          decoration: BoxDecoration(
+            color: const Color(0xFF29ABE0), // Azul oficial de Ko-fi
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: Colors.white, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF29ABE0).withOpacity(0.5),
+                blurRadius: 15,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Imagen PNG del Logo
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Image.asset(
+                  'assets/images/kofi.png',
+                  // Fallback si no encuentra la imagen
+                  errorBuilder: (c, o, s) =>
+                      const Icon(Icons.coffee, color: Colors.white),
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                "Invítame un Café",
+                style: TextStyle(
+                  fontFamily: 'Bungee',
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(width: 15),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // --- WIDGET INTERNO DEL TUTORIAL ---
 class _TutorialCard extends StatefulWidget {
   final VoidCallback onClose;
@@ -243,8 +417,6 @@ class _TutorialCard extends StatefulWidget {
 
 class _TutorialCardState extends State<_TutorialCard> {
   int _currentStep = 0;
-
-  // 2. VARIABLES DE AUDIO
   late AudioPlayer _audioPlayer;
   bool _isPlaying = false;
 
@@ -279,10 +451,7 @@ class _TutorialCardState extends State<_TutorialCard> {
   @override
   void initState() {
     super.initState();
-    // Inicializar reproductor
     _audioPlayer = AudioPlayer();
-
-    // Escuchar cuando el audio termina para cambiar el ícono
     _audioPlayer.onPlayerComplete.listen((event) {
       if (mounted) setState(() => _isPlaying = false);
     });
@@ -290,13 +459,11 @@ class _TutorialCardState extends State<_TutorialCard> {
 
   @override
   void dispose() {
-    // Detener y liberar memoria al cerrar el tutorial
     _audioPlayer.stop();
     _audioPlayer.dispose();
     super.dispose();
   }
 
-  // Función para controlar el audio
   void _toggleAudio() async {
     if (_isPlaying) {
       await _audioPlayer.pause();
@@ -338,7 +505,6 @@ class _TutorialCardState extends State<_TutorialCard> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cabecera: Título, Botón de Audio y Cerrar
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -350,10 +516,8 @@ class _TutorialCardState extends State<_TutorialCard> {
                   color: AppColors.accent,
                 ),
               ),
-
               Row(
                 children: [
-                  // 3. BOTÓN DE AUDIO NUEVO
                   IconButton(
                     onPressed: _toggleAudio,
                     icon: Icon(
@@ -373,10 +537,7 @@ class _TutorialCardState extends State<_TutorialCard> {
               ),
             ],
           ),
-
           const SizedBox(height: 15),
-
-          // Texto del paso
           Text(
             step["text"]!,
             style: const TextStyle(
@@ -386,14 +547,10 @@ class _TutorialCardState extends State<_TutorialCard> {
               height: 1.4,
             ),
           ),
-
           const SizedBox(height: 30),
-
-          // Barra de progreso y botón
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Indicador de puntitos (opcional pero se ve pro)
               Row(
                 children: List.generate(
                   _steps.length,
@@ -410,8 +567,6 @@ class _TutorialCardState extends State<_TutorialCard> {
                   ),
                 ),
               ),
-
-              // Botón de acción
               ElevatedButton(
                 onPressed: _next,
                 style: ElevatedButton.styleFrom(
