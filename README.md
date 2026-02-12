@@ -70,9 +70,18 @@ Impostor MX es completamente gratuito y sin anuncios. Si disfrutas el juego y qu
 
 Tu apoyo ayuda a mantener el proyecto vivo y a seguir desarrollando nuevas funcionalidades.
 
-## Licencia
+## Licencia y Cumplimiento
 
-Este proyecto está licenciado bajo GPLv3. Consulta el archivo `LICENSE` para más detalles.
+Este proyecto está bajo [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
+Esto significa:
+
+- puedes usar, modificar y distribuir libremente
+- Si distribuyes versiones modificadas, DEBES publicar el código fuente
+- No puedes crear versiones "premium cerradas"
+
+**Violaciones de licencia:** Si detectas uso indebido de este código, 
+repórtalo, abre un issue. La comunidad de código abierto
+protege estos derechos activamente.
 
 ---
 
