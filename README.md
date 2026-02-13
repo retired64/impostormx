@@ -44,11 +44,56 @@ Cuando el tiempo termine, voten por quien crean que es el Impostor. Si atrapan a
 
 Para instalar desde GitHub, simplemente descarga el archivo .APK de la última release e instálalo en tu dispositivo Android.
 
-## 🛠️ Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 - **Flutter:** Framework multiplataforma para una experiencia fluida
 - **Dart:** Lenguaje de programación eficiente y moderno
 - **Arquitectura modular:** Código limpio y organizado para facilitar el mantenimiento
+# Compilar sin Configuración Local (GitHub Actions)
+
+¿Quieres compilar ImpostorMX sin instalar nada en tu computadora? ¡Usa GitHub Actions!
+
+## Pasos Rápidos:
+
+1. **Haz Fork** a este repositorio (botón "Fork" arriba a la derecha)
+2. Ve a tu fork → pestaña **"Actions"**
+3. Selecciona **"Build ImpostorMX Android"** en el panel izquierdo
+4. Haz clic en **"Run workflow"** → selecciona branch `main` → **"Run workflow"**
+5. Espera 3-5 minutos ⏱️
+6. Cuando termine (marca verde), ve a **"Artifacts"** y descarga **"impostormx-android-apk"**
+7. Descomprime el ZIP e instala el APK en tu Android 📱
+
+**Platforms disponibles:**
+- 🤖 Android (APK + AAB)
+- 🍎 iOS (IPA sin firmar)
+- 🖥️ Windows
+- 🐧 Linux  
+- 🍎 macOS
+
+**Los artifacts se guardan por 30 días.** Después puedes volver a compilar cuando quieras.
+
+---
+
+## O Descarga Directo desde Releases
+
+Si solo quieres probar el juego rápido:
+- Ve a [Releases](https://github.com/retired64/ImpostorMX/releases) y descarga la última APK
+
+---
+
+## Seguridad
+
+Esta app es 100% segura:
+- ✅ **Sin internet** - Completamente offline
+- ✅ **Sin permisos invasivos** - Solo vibración
+- ✅ **Código abierto** - Revisa tú mismo el código
+- ✅ **Sin recolección de datos** - Cero tracking
+
+Verifica los permisos: [AndroidManifest.xml](https://github.com/retired64/ImpostorMX/blob/main/android/app/src/main/AndroidManifest.xml)
+
+---
+
+**[Ver Guía Detallada de Compilación](COMPILAR_CON_GITHUB_ACTIONS.md)** con capturas de pantalla y solución de problemas.
 
 # Instalación iOS
 
