@@ -1,1 +1,17 @@
+IOS
+generar iconos https://icon.kitchen/
 ios/Runner/Assets.xcassets/AppIcon.appiconset/
+
+MACOS
+generar iconos mac: https://www.appicon.co/
+macos/Runner/Assets.xcassets/AppIcon.appiconset/
+
+WINDOWS
+generar el app_icon.ico cualquier web que lo haga
+windows/runner/resources/app_icon.ico
+
+
+Android
+generar iconos: https://icon.kitchen/
+
+Linux
