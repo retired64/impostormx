@@ -52,7 +52,7 @@ Para instalar desde GitHub, simplemente descarga el archivo .APK de la última r
 
 # Compilar con GitHub Actions
 
-¿Quieres compilar ImpostorMX sin instalar nada en tu computadora? ¡Usa GitHub Actions!
+¿Quieres compilar ImpostorMX Desde el Código fuente, sin instalar nada en tu computadora? ¡Usa GitHub Actions!
 
 ## Pasos Rápidos:
 
