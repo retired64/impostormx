@@ -1,0 +1,60 @@
+name: Build ImpostorMX iOS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: Build iOS Application
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build iOS Release (No Codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Package iOS Application
+        run: |
+          BUILD_PATH="build/ios/iphoneos"
+          APP_NAME="impostormx-ios-v1.0.0"
+          
+          # Crear carpeta para empaquetado
+          mkdir -p "$APP_NAME"
+          
+          # Copiar la aplicación .app
+          cp -R "$BUILD_PATH/Runner.app" "$APP_NAME/"
+          
+          # Crear archivo IPA (sin firmar)
+          mkdir -p "$APP_NAME/Payload"
+          cp -R "$BUILD_PATH/Runner.app" "$APP_NAME/Payload/"
+          cd "$APP_NAME"
+          zip -r impostormx-v1.0.0-unsigned.ipa Payload
+          rm -rf Payload
+          cd ..
+          
+          # Mostrar información
+          echo "iOS application packaged successfully"
+          echo "Note: This is an UNSIGNED build. For App Store distribution, you need to:"
+          echo "1. Sign the app with your Apple Developer certificate"
+          echo "2. Use Xcode or fastlane for proper signing and provisioning"
+          ls -la "$APP_NAME"
+          du -sh "$APP_NAME"
+        shell: bash
+
+      - name: Upload iOS Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: impostormx-ios-release
+          path: impostormx-ios-v1.0.0/
+          retention-days: 30
