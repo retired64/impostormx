@@ -1,30 +1,21 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
-import 'package:impostormx/main.dart';
+import 'package:impostormx/main.dart'; // Tu archivo main
+import 'package:impostormx/providers/game_provider.dart'; // Tu provider
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const ImpostorApp());
+  testWidgets('Prueba de inicio de Impostor MX', (WidgetTester tester) async {
+    // 1. Envolvemos la app en el GameProvider para que no tire error
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [ChangeNotifierProvider(create: (_) => GameProvider())],
+        child:
+            const ImpostorApp(), // <-- Asegúrate de que este sea el nombre de tu clase principal en main.dart
+      ),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // 2. Verificamos que cargue la pantalla principal buscando un texto que SÍ existe
+    expect(find.text('Elige un tema'), findsOneWidget);
   });
 }
