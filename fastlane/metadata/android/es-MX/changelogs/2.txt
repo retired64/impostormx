@@ -1,0 +1,9 @@
+Versión 2.0.0 - Actualización Mayor
+- NUEVO: Sistema avanzado de vibración háptica
+- NUEVO: Pantalla siempre encendida durante el juego
+- Efectos de sonido con audioplayers
+- Interfaz mejorada con animaciones escalonadas
+- Efectos de confeti para celebraciones
+- Soporte para enlaces externos
+- Preferencias de usuario mejoradas
+- Múltiples correcciones de errores y mejoras de rendimiento

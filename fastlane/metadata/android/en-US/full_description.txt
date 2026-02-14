@@ -1,0 +1,43 @@
+Impostor MX is the digital version of the classic party game everyone loves. Gather your friends, pass the phone around, and discover who's lying in rounds full of laughter and strategic debates.
+
+This project was born to offer a completely free, no-compromise, and open-source alternative to traditional party games.
+
+<b>What makes Impostor MX special?</b>
+
+<ul>
+<li><b>No Ads:</b> Zero interruptions. Just pure fun.</li>
+<li><b>100% Free:</b> No in-app purchases or hidden subscriptions.</li>
+<li><b>Fully Offline:</b> Perfect for trips, meetings without internet, or parties without worrying about data.</li>
+<li><b>Customizable:</b> Create your own themed categories and adjust the game rules.</li>
+<li><b>Punishment Wheel:</b> An exclusive mechanic that adds more excitement at the end of each round.</li>
+</ul>
+
+<b>How to Play:</b>
+
+<ul>
+<li><b>Choose Your Category:</b> Select a themed category or create your own.</li>
+<li><b>Set Up the Game:</b> Pass the phone so each player can set their name and PIN. Define how many Impostors there will be, debate time, and punishments.</li>
+<li><b>Discover Your Role:</b> Each player enters their PIN privately to reveal a secret word. Everyone will see the word... except the Impostor.</li>
+<li><b>The Debate:</b> Ask strategic questions. Civilians try to identify the Impostor, while they try to go unnoticed and deduce the secret word.</li>
+<li><b>Voting and Punishment:</b> Vote for who you think is the Impostor. The loser must spin the punishment wheel!</li>
+</ul>
+
+<b>Ideal For:</b>
+
+<ul>
+<li>Parties and family gatherings</li>
+<li>Game nights with friends</li>
+<li>Long trips without connection</li>
+<li>School or corporate activities</li>
+<li>Any occasion where you want to have a good time</li>
+</ul>
+
+<b>Technical Features:</b>
+
+<ul>
+<li>100% open source (GPL-3.0)</li>
+<li>No invasive permissions</li>
+<li>No tracking or data collection</li>
+<li>Works completely offline</li>
+<li>Multi-language support</li>
+</ul>

@@ -1,0 +1,43 @@
+Impostor MX es la versión digital del clásico juego de fiesta que todos aman. Reúne a tus amigos, pasen el teléfono y descubran quién está mintiendo en partidas llenas de risas y debates estratégicos.
+
+Este proyecto nació para ofrecer una alternativa completamente gratuita, sin compromisos y de código abierto a los juegos de fiesta tradicionales.
+
+<b>¿Qué hace especial a Impostor MX?</b>
+
+<ul>
+<li><b>Sin Anuncios:</b> Cero interrupciones. Solo diversión pura.</li>
+<li><b>100% Gratuito:</b> No hay compras dentro de la app ni suscripciones ocultas.</li>
+<li><b>Totalmente Offline:</b> Perfecta para viajes, reuniones sin internet o fiestas sin preocuparte por los datos.</li>
+<li><b>Personalizable:</b> Crea tus propias categorías temáticas y ajusta las reglas del juego.</li>
+<li><b>Ruleta de Castigos:</b> Una mecánica exclusiva que añade más emoción al final de cada partida.</li>
+</ul>
+
+<b>Cómo Se Juega:</b>
+
+<ul>
+<li><b>Elige tu Categoría:</b> Selecciona una categoría temática o crea las tuyas propias.</li>
+<li><b>Configura la Partida:</b> Pasa el celular para que cada jugador configure su nombre y PIN. Define cuántos Impostores habrá, el tiempo de debate y los castigos.</li>
+<li><b>Descubre tu Rol:</b> Cada jugador ingresa su PIN en privado para revelar una palabra secreta. Todos verán la palabra... excepto el Impostor.</li>
+<li><b>El Debate:</b> Hagan preguntas estratégicas. Los civiles intentan identificar al Impostor, mientras este trata de pasar desapercibido y deducir la palabra secreta.</li>
+<li><b>Votación y Castigo:</b> Voten por quien crean que es el Impostor. ¡El perdedor deberá girar la ruleta de castigos!</li>
+</ul>
+
+<b>Ideal Para:</b>
+
+<ul>
+<li>Fiestas y reuniones familiares</li>
+<li>Noches de juegos entre amigos</li>
+<li>Viajes largos sin conexión</li>
+<li>Actividades escolares o corporativas</li>
+<li>Cualquier ocasión donde quieras pasar un buen rato</li>
+</ul>
+
+<b>Características Técnicas:</b>
+
+<ul>
+<li>100% código abierto (GPL-3.0)</li>
+<li>Sin permisos invasivos</li>
+<li>Sin rastreo ni recolección de datos</li>
+<li>Funciona completamente offline</li>
+<li>Soporte para múltiples idiomas</li>
+</ul>

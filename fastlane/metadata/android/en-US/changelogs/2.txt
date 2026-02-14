@@ -1,0 +1,9 @@
+Version 2.0.0 - Major Update
+- NEW: Advanced haptic feedback system
+- NEW: Wake lock to keep screen on during gameplay
+- Added sound effects with audioplayers
+- Improved UI with staggered animations
+- Added confetti effects for celebrations
+- URL launcher support for external links
+- Enhanced user preferences with SharedPreferences
+- Multiple bug fixes and performance improvements
