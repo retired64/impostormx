@@ -1,4 +1,11 @@
 Si a futuro decides agregar Alemán (de) o Chino (zh) etc, esta guía de 5 pasos te ayudará a entender como lograrlo:
+
+![Instrucciones](0-Lang-Instructions.png)
+
+___________________
+
+![estructura de datos](estructura.png)
+
 1. El Diccionario (Textos de la Interfaz)
  * Crea un nuevo archivo en tu carpeta lib/lang/, por ejemplo de.dart (usando siempre el estándar ISO de dos letras). [Ver Lista](ISO3166-1alfa-2.md)
  * Copia la estructura exacta de en.dart.
