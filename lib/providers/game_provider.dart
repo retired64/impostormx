@@ -57,10 +57,9 @@ class GameProvider with ChangeNotifier {
 
   List<Player> players = [];
 
-  // --- NUEVA IMPLEMENTACIÓN: Selección múltiple ---
+  // --- SELECCIÓN MÚLTIPLE DE CATEGORÍAS ---
   List<Category> selectedCategories = [];
 
-  // Getter auxiliar para mostrar el nombre en pantallas de juego
   String get selectedCategoriesName {
     if (selectedCategories.isEmpty) return "";
     if (selectedCategories.length == 1) return selectedCategories.first.name;
@@ -69,12 +68,15 @@ class GameProvider with ChangeNotifier {
 
   String secretWord = '';
 
-  // Configuración de Partida
+  // --- EL CORAZÓN DEL CAOS (Global Random) ---
+  // Se instancia UNA SOLA VEZ al abrir la app para asegurar entropía pura
+  // en cada partida, evitando que se repitan los roles numéricos.
+  final Random _random = Random();
+
   int impostorCount = 1;
   int initialTimeSeconds = GameConstants.defaultTimeSeconds;
   int currentTurnIndex = 0;
 
-  // Estado del Juego
   Timer? _timer;
   int remainingSeconds = 0;
   bool isTimerRunning = false;
@@ -99,7 +101,6 @@ class GameProvider with ChangeNotifier {
     }
   }
 
-  // --- PERSISTENCIA (CATEGORÍAS) ---
   Future<void> _loadCustomCategories() async {
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getString(GameConstants.prefsCustomCategories);
@@ -142,7 +143,6 @@ class GameProvider with ChangeNotifier {
     await prefs.setString(GameConstants.prefsCustomCategories, encoded);
   }
 
-  // --- PERSISTENCIA (CASTIGOS / RULETA) ---
   Future<void> _loadPunishments() async {
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getStringList(GameConstants.prefsPunishments);
@@ -179,7 +179,6 @@ class GameProvider with ChangeNotifier {
     await prefs.setStringList(GameConstants.prefsPunishments, punishments);
   }
 
-  // --- HARDWARE (AUDIO & VIBRACIÓN) ---
   Future<void> playAlarm() async {
     try {
       if (_isPlayingAudio) await _audioPlayer.stop();
@@ -209,13 +208,12 @@ class GameProvider with ChangeNotifier {
 
   void _hapticLight() => Vibration.vibrate(duration: 10);
 
-  // --- GESTIÓN JUGADORES ---
   void _addEmptyPlayer() {
     players.add(
       Player(
         id:
             DateTime.now().microsecondsSinceEpoch.toString() +
-            Random().nextInt(999).toString(),
+            _random.nextInt(999).toString(),
       ),
     );
     notifyListeners();
@@ -267,9 +265,6 @@ class GameProvider with ChangeNotifier {
     }
   }
 
-  // --- AJUSTES DE CATEGORÍA ---
-
-  // Función para agregar o quitar categorías de la selección
   void toggleCategory(Category cat) {
     final index = selectedCategories.indexWhere((c) => c.id == cat.id);
     if (index != -1) {
@@ -302,9 +297,8 @@ class GameProvider with ChangeNotifier {
     }
   }
 
-  // --- GAMEPLAY: ALGORITMO CAOS V2 ---
+  // --- GAMEPLAY Y ALGORITMO CAOS ---
   void startGame() {
-    // Validamos que haya selección
     if (selectedCategories.isEmpty) return;
 
     final lockedPlayers = players.where((p) => p.isLocked).toList();
@@ -314,23 +308,21 @@ class GameProvider with ChangeNotifier {
     _timer?.cancel();
     isTimerRunning = false;
 
+    // 1. Limpieza total de roles (todos regresan a civiles)
     for (var p in players) {
       p.role = 'civilian';
     }
 
-    final random = Random(DateTime.now().microsecondsSinceEpoch);
-
-    // --- Lógica de combinación de palabras ---
+    // 2. Extraer TODAS las palabras de las categorías seleccionadas
     List<String> combinedWords = [];
     for (var cat in selectedCategories) {
       combinedWords.addAll(cat.words);
     }
-    // Seleccionamos la palabra del pozo acumulado
-    secretWord = combinedWords[random.nextInt(combinedWords.length)];
 
-    // ======================================================================
-    // MANTENEMOS EL ALGORITMO CAOS V2 TAL CUAL PARA LOS IMPOSTORES
-    // ======================================================================
+    // Elegimos la palabra secreta usando la semilla global
+    secretWord = combinedWords[_random.nextInt(combinedWords.length)];
+
+    // 3. Algoritmo Caos V2 (Sorteo de Impostores sin repetir patrón)
     int safeImpostorCount = impostorCount;
     if (safeImpostorCount >= lockedPlayers.length) safeImpostorCount = 1;
 
@@ -339,18 +331,20 @@ class GameProvider with ChangeNotifier {
     for (int i = 0; i < safeImpostorCount; i++) {
       if (bagOfIndices.isEmpty) break;
 
-      int randomIndex = random.nextInt(bagOfIndices.length);
+      // Usamos la semilla global que nunca se reinicia
+      int randomIndex = _random.nextInt(bagOfIndices.length);
       int luckyPlayerIndex = bagOfIndices[randomIndex];
 
       lockedPlayers[luckyPlayerIndex].role = 'impostor';
-      bagOfIndices.removeAt(randomIndex);
+      bagOfIndices.removeAt(randomIndex); // Sacamos al jugador de la bolsa
     }
-    // ======================================================================
 
+    // 4. Reinicio de turno y estado
     currentTurnIndex = 0;
     status = GameStatus.playing;
     remainingSeconds = initialTimeSeconds;
 
+    // Feedback general (lo sienten todos porque el cel está en la mesa)
     Vibration.vibrate(pattern: GameConstants.hapticSuccess);
     notifyListeners();
   }
@@ -367,7 +361,6 @@ class GameProvider with ChangeNotifier {
     return active[currentTurnIndex];
   }
 
-  // --- TIMER ---
   void startTimer() {
     WakelockPlus.enable();
     isTimerRunning = true;
@@ -433,25 +426,24 @@ class GameProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // --- OPTIMIZACIÓN: Revancha Rápida ---
   void prepareNewMatch() {
-    _cleanup();
-    for (var p in players) {
-      p.role = 'civilian';
-    }
-
-    currentTurnIndex = 0;
-    remainingSeconds = initialTimeSeconds;
-    status = GameStatus.setup;
-
-    notifyListeners();
-  }
-
-  void exitGame() {
     _timer?.cancel();
     stopAudio();
     WakelockPlus.disable();
-    players.clear();
-    _initGame();
+    isTimerRunning = false;
+
+    // Al llamar startGame, garantizamos una limpieza interna de roles,
+    // nueva extracción de palabras y nuevos impostores usando el Random global.
+    startGame();
+  }
+
+  // --- OPTIMIZACIÓN: Hard Reset al Menú ---
+  void exitGame() {
+    _cleanup();
+    selectedCategories.clear(); // Limpia los temas
+    players.clear(); // Elimina los jugadores
+    _initGame(); // Crea 4 jugadores vacíos de nuevo
     status = GameStatus.setup;
     notifyListeners();
   }
@@ -460,7 +452,6 @@ class GameProvider with ChangeNotifier {
     _timer?.cancel();
     stopAudio();
     WakelockPlus.disable();
-    selectedCategories.clear();
     status = GameStatus.setup;
     isTimerRunning = false;
     currentTurnIndex = 0;

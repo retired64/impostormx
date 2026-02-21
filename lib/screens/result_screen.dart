@@ -24,11 +24,12 @@ import 'package:provider/provider.dart';
 import 'package:vibration/vibration.dart';
 import 'package:confetti/confetti.dart';
 import '../providers/game_provider.dart';
-import '../providers/language_provider.dart'; // <--- IMPORTAMOS EL LANGUAGE PROVIDER
+import '../providers/language_provider.dart';
 import '../widgets/inputs.dart';
 import '../config/theme.dart';
 import '../utils/sound_manager.dart';
 import 'category_screen.dart';
+import 'login_screen.dart'; // <--- IMPORTANTE: Importamos la pantalla de login
 
 class ResultScreen extends StatelessWidget {
   final Player votedPlayer;
@@ -36,17 +37,13 @@ class ResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lang = Provider.of<LanguageProvider>(
-      context,
-    ); // <--- INSTANCIAMOS EL IDIOMA
+    final lang = Provider.of<LanguageProvider>(context);
     final bool isImpostor = votedPlayer.role == 'impostor';
 
-    // Colores de fondo según el resultado
     final bgColor = isImpostor
         ? const Color(0xFF00C853)
         : const Color(0xFFD50000);
 
-    // Textos traducidos según el rol
     final winnerText = isImpostor
         ? lang.translate('result_win_civilians')
         : lang.translate('result_win_impostor');
@@ -61,7 +58,6 @@ class ResultScreen extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 10),
-            // TÍTULO DEL GANADOR
             Text(
               winnerText,
               textAlign: TextAlign.center,
@@ -82,7 +78,6 @@ class ResultScreen extends StatelessWidget {
               ),
             ),
 
-            // --- LA RULETA (Con Confeti integrado) ---
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -93,7 +88,6 @@ class ResultScreen extends StatelessWidget {
               ),
             ),
 
-            // BOTONES INFERIORES
             Container(
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
@@ -105,6 +99,7 @@ class ResultScreen extends StatelessWidget {
                   Expanded(
                     child: TextButton(
                       onPressed: () {
+                        // Hard Reset al salir
                         Provider.of<GameProvider>(
                           context,
                           listen: false,
@@ -118,9 +113,7 @@ class ResultScreen extends StatelessWidget {
                         );
                       },
                       child: Text(
-                        lang.translate(
-                          'result_btn_exit',
-                        ), // <--- TEXTO DINÁMICO
+                        lang.translate('result_btn_exit'),
                         style: const TextStyle(
                           color: Colors.white54,
                           fontWeight: FontWeight.bold,
@@ -131,19 +124,20 @@ class ResultScreen extends StatelessWidget {
                   const SizedBox(width: 20),
                   Expanded(
                     child: BouncyButton(
-                      text: lang.translate(
-                        'result_btn_play_again',
-                      ), // <--- TEXTO DINÁMICO
+                      text: lang.translate('result_btn_play_again'),
                       color: AppColors.accent,
                       onPressed: () {
+                        // Preparamos la partida internamente (sorteo de roles y palabra)
                         Provider.of<GameProvider>(
                           context,
                           listen: false,
                         ).prepareNewMatch();
+
+                        // Saltamos directo al ciclo de juego
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const CategoryScreen(),
+                            builder: (_) => const LoginScreen(),
                           ),
                           (r) => false,
                         );
@@ -186,7 +180,6 @@ class _PunishmentRouletteState extends State<PunishmentRoulette> {
   @override
   void initState() {
     super.initState();
-    // Duración de la lluvia de confeti (3 segundos)
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 3),
     );
@@ -218,21 +211,17 @@ class _PunishmentRouletteState extends State<PunishmentRoulette> {
   @override
   Widget build(BuildContext context) {
     final punishments = Provider.of<GameProvider>(context).punishments;
-    final lang = Provider.of<LanguageProvider>(
-      context,
-    ); // <--- INSTANCIAMOS EL IDIOMA
+    final lang = Provider.of<LanguageProvider>(context);
 
     return Stack(
       alignment: Alignment.topCenter,
       children: [
-        // --- CAPA 1: La Ruleta y Botones ---
         Column(
           children: [
             Expanded(
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // La Rueda
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -255,11 +244,8 @@ class _PunishmentRouletteState extends State<PunishmentRoulette> {
                       onAnimationEnd: () {
                         setState(() => _isSpinning = false);
                         Vibration.vibrate(pattern: [0, 50, 100, 500]);
-
-                        // Disparar confeti
                         _confettiController.play();
-
-                        _showResultDialog(lang); // <--- PASAMOS EL PROVIDER
+                        _showResultDialog(lang);
                       },
                       indicators: const <FortuneIndicator>[
                         FortuneIndicator(
@@ -294,8 +280,6 @@ class _PunishmentRouletteState extends State<PunishmentRoulette> {
                       ],
                     ),
                   ),
-
-                  // Botón Central "?"
                   GestureDetector(
                     onTap: _spin,
                     child: Container(
@@ -334,18 +318,16 @@ class _PunishmentRouletteState extends State<PunishmentRoulette> {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
             if (!_isSpinning)
               BouncyButton(
-                text: lang.translate('result_btn_spin'), // <--- TEXTO DINÁMICO
+                text: lang.translate('result_btn_spin'),
                 color: Colors.white,
                 onPressed: _spin,
               )
             else
               Text(
-                lang.translate('result_luck'), // <--- TEXTO DINÁMICO
+                lang.translate('result_luck'),
                 style: const TextStyle(
                   fontFamily: 'Bungee',
                   fontSize: 20,
@@ -354,8 +336,6 @@ class _PunishmentRouletteState extends State<PunishmentRoulette> {
               ),
           ],
         ),
-
-        // --- CAPA 2: Confeti ---
         ConfettiWidget(
           confettiController: _confettiController,
           blastDirectionality: BlastDirectionality.explosive,
@@ -403,7 +383,7 @@ class _PunishmentRouletteState extends State<PunishmentRoulette> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                lang.translate('result_your_punishment'), // <--- TEXTO DINÁMICO
+                lang.translate('result_your_punishment'),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontFamily: 'Bungee',
@@ -423,9 +403,7 @@ class _PunishmentRouletteState extends State<PunishmentRoulette> {
               ),
               const SizedBox(height: 30),
               BouncyButton(
-                text: lang.translate(
-                  'result_btn_accept',
-                ), // <--- TEXTO DINÁMICO
+                text: lang.translate('result_btn_accept'),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
